@@ -1,11 +1,53 @@
-import React, { useState } from 'react';
-import { Pressable, SafeAreaView, StatusBar, StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { AppState, Platform, Pressable, SafeAreaView, StatusBar, StyleSheet, Text, View } from 'react-native';
 import { JarvisCore } from './src/components/JarvisCore';
 import { nextState } from './src/state/assistantMachine';
 import type { AssistantState } from './src/types/assistant';
 
+const UPDATE_STORAGE_KEY = 'cr3atix-jarvis-build';
+
+async function checkForWebUpdate() {
+  if (Platform.OS !== 'web') return;
+
+  const runtime = globalThis as typeof globalThis & {
+    localStorage?: Storage;
+    location?: Location;
+  };
+
+  try {
+    const response = await fetch(`./version.json?t=${Date.now()}`, {
+      cache: 'no-store',
+      headers: { 'cache-control': 'no-cache' },
+    });
+    if (!response.ok) return;
+
+    const data = (await response.json()) as { build?: string };
+    if (!data.build || !runtime.localStorage || !runtime.location) return;
+
+    const previousBuild = runtime.localStorage.getItem(UPDATE_STORAGE_KEY);
+    runtime.localStorage.setItem(UPDATE_STORAGE_KEY, data.build);
+
+    if (previousBuild && previousBuild !== data.build) {
+      const basePath = runtime.location.pathname;
+      runtime.location.replace(`${basePath}?build=${data.build.slice(0, 12)}`);
+    }
+  } catch {
+    // L'application reste utilisable hors ligne ou en cas d'échec réseau.
+  }
+}
+
 export default function App() {
   const [state, setState] = useState<AssistantState>('IDLE');
+
+  useEffect(() => {
+    void checkForWebUpdate();
+
+    const subscription = AppState.addEventListener('change', (nextAppState) => {
+      if (nextAppState === 'active') void checkForWebUpdate();
+    });
+
+    return () => subscription.remove();
+  }, []);
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -37,7 +79,7 @@ export default function App() {
           </Pressable>
         </View>
 
-        <Text style={styles.footer}>ANDROID CORE • WEB PREVIEW • BUILD 001</Text>
+        <Text style={styles.footer}>AUTO-UPDATE • WEB PREVIEW • ANDROID CORE</Text>
       </View>
     </SafeAreaView>
   );
