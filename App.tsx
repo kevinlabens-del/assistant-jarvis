@@ -4,101 +4,16 @@ import { JarvisCore } from './src/components/JarvisCore';
 import { nextState } from './src/state/assistantMachine';
 import type { AssistantState } from './src/types/assistant';
 
-const UPDATE_STORAGE_KEY = 'cr3atix-jarvis-build';
+const UPDATE_STORAGE_KEY='cr3atix-jarvis-build';
+async function checkForWebUpdate(){if(Platform.OS!=='web')return;const runtime=globalThis as typeof globalThis&{localStorage?:Storage;location?:Location};try{const r=await fetch(`./version.json?t=${Date.now()}`,{cache:'no-store',headers:{'cache-control':'no-cache'}});if(!r.ok)return;const d=await r.json() as {build?:string};if(!d.build||!runtime.localStorage||!runtime.location)return;const prev=runtime.localStorage.getItem(UPDATE_STORAGE_KEY);runtime.localStorage.setItem(UPDATE_STORAGE_KEY,d.build);if(prev&&prev!==d.build){runtime.location.replace(`${runtime.location.pathname}?build=${d.build.slice(0,12)}`);}}catch{}}
 
-async function checkForWebUpdate() {
-  if (Platform.OS !== 'web') return;
-
-  const runtime = globalThis as typeof globalThis & {
-    localStorage?: Storage;
-    location?: Location;
-  };
-
-  try {
-    const response = await fetch(`./version.json?t=${Date.now()}`, {
-      cache: 'no-store',
-      headers: { 'cache-control': 'no-cache' },
-    });
-    if (!response.ok) return;
-
-    const data = (await response.json()) as { build?: string };
-    if (!data.build || !runtime.localStorage || !runtime.location) return;
-
-    const previousBuild = runtime.localStorage.getItem(UPDATE_STORAGE_KEY);
-    runtime.localStorage.setItem(UPDATE_STORAGE_KEY, data.build);
-
-    if (previousBuild && previousBuild !== data.build) {
-      const basePath = runtime.location.pathname;
-      runtime.location.replace(`${basePath}?build=${data.build.slice(0, 12)}`);
-    }
-  } catch {
-    // L'application reste utilisable hors ligne ou en cas d'échec réseau.
-  }
+export default function App(){
+  const [state,setState]=useState<AssistantState>('IDLE');
+  useEffect(()=>{void checkForWebUpdate();const sub=AppState.addEventListener('change',s=>{if(s==='active')void checkForWebUpdate();});return()=>sub.remove();},[]);
+  return <SafeAreaView style={styles.safe}><StatusBar barStyle="light-content" backgroundColor="#00070A"/><View style={styles.root}>
+    <View pointerEvents="none" style={styles.brand}><Text style={styles.name}>CR3@TIX-JARVIS</Text><Text style={styles.sub}>ASSISTANT IA PERSONNEL</Text></View>
+    <View style={styles.core}><JarvisCore state={state}/></View>
+    <View style={styles.controls}><Pressable accessibilityRole="button" accessibilityLabel="Passer à l'état suivant" onPress={()=>setState(s=>nextState(s))} style={({pressed})=>[styles.button,pressed&&styles.pressed]}><Text style={styles.buttonText}>ÉTAT SUIVANT</Text></Pressable><Text style={styles.update}>AUTO-UPDATE ACTIF</Text></View>
+  </View></SafeAreaView>;
 }
-
-export default function App() {
-  const [state, setState] = useState<AssistantState>('IDLE');
-
-  useEffect(() => {
-    void checkForWebUpdate();
-
-    const subscription = AppState.addEventListener('change', (nextAppState) => {
-      if (nextAppState === 'active') void checkForWebUpdate();
-    });
-
-    return () => subscription.remove();
-  }, []);
-
-  return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="light-content" backgroundColor="#010609" />
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <Text style={styles.kicker}>CR3@TIX // ASSISTANT SYSTEM</Text>
-          <Text style={styles.brand}>CR3@TIX-JARVIS</Text>
-          <Text style={styles.version}>V1.0 • REACT NATIVE + WEB</Text>
-        </View>
-
-        <JarvisCore state={state} />
-
-        <View style={styles.panel}>
-          <View style={styles.panelTop}>
-            <Text style={styles.panelTitle}>PROTOCOLE D'ÉTATS</Text>
-            <View style={styles.onlineDot} />
-          </View>
-          <Text style={styles.description}>
-            Prototype interactif du corps numérique. Le bouton simule les futurs événements voix, IA et actions Android.
-          </Text>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Passer à l'état suivant"
-            onPress={() => setState((current) => nextState(current))}
-            style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}
-          >
-            <Text style={styles.buttonText}>SIMULER L'ÉTAT SUIVANT</Text>
-          </Pressable>
-        </View>
-
-        <Text style={styles.footer}>AUTO-UPDATE • WEB PREVIEW • ANDROID CORE</Text>
-      </View>
-    </SafeAreaView>
-  );
-}
-
-const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: '#010609' },
-  container: { flex: 1, width: '100%', maxWidth: 680, alignSelf: 'center', paddingHorizontal: 20, paddingTop: 16, paddingBottom: 14, justifyContent: 'space-between' },
-  header: { alignItems: 'center', paddingTop: 6 },
-  kicker: { color: '#386D78', fontSize: 9, fontWeight: '800', letterSpacing: 2.5 },
-  brand: { color: '#E9FBFF', fontSize: 25, lineHeight: 32, fontWeight: '900', letterSpacing: 1.5, marginTop: 8 },
-  version: { color: '#45AFC4', fontSize: 10, fontWeight: '700', letterSpacing: 2, marginTop: 5 },
-  panel: { borderWidth: 1, borderColor: '#0B5365', backgroundColor: 'rgba(3,19,27,0.93)', padding: 17, borderRadius: 18 },
-  panelTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  panelTitle: { color: '#72E9FF', fontSize: 12, fontWeight: '900', letterSpacing: 2 },
-  onlineDot: { width: 7, height: 7, borderRadius: 7, backgroundColor: '#31E5FF' },
-  description: { marginTop: 10, color: '#91B7C0', fontSize: 12, lineHeight: 18 },
-  button: { marginTop: 15, minHeight: 49, borderRadius: 13, borderWidth: 1, borderColor: '#27D6F6', backgroundColor: 'rgba(15,110,132,0.18)', alignItems: 'center', justifyContent: 'center' },
-  buttonPressed: { opacity: 0.7, transform: [{ scale: 0.99 }] },
-  buttonText: { color: '#DDFBFF', fontSize: 12, fontWeight: '900', letterSpacing: 1.5 },
-  footer: { color: '#2C5963', textAlign: 'center', fontSize: 8, fontWeight: '800', letterSpacing: 1.7 },
-});
+const styles=StyleSheet.create({safe:{flex:1,backgroundColor:'#00070A'},root:{flex:1,width:'100%',maxWidth:720,alignSelf:'center',backgroundColor:'#00070A',overflow:'hidden'},brand:{position:'absolute',zIndex:3,top:18,left:22},name:{color:'#EAFBFF',fontSize:18,fontWeight:'900',letterSpacing:1.7,textShadowColor:'rgba(54,220,255,.38)',textShadowRadius:8},sub:{marginTop:3,color:'#4DB9D0',fontSize:8,fontWeight:'800',letterSpacing:2.1},core:{flex:1,minHeight:680},controls:{position:'absolute',zIndex:4,left:0,right:0,bottom:18,alignItems:'center'},button:{minWidth:148,minHeight:40,paddingHorizontal:18,borderRadius:22,borderWidth:1,borderColor:'rgba(59,221,255,.45)',backgroundColor:'rgba(0,25,35,.62)',alignItems:'center',justifyContent:'center'},pressed:{opacity:.65,transform:[{scale:.98}]},buttonText:{color:'#CFF9FF',fontSize:9,fontWeight:'900',letterSpacing:1.8},update:{marginTop:6,color:'#285B66',fontSize:7,fontWeight:'800',letterSpacing:1.5}});
