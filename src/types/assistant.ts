@@ -1,4 +1,5 @@
 export type AssistantState =
+  | 'MATERIALIZING'
   | 'IDLE'
   | 'WAKE'
   | 'LISTENING'
@@ -6,7 +7,8 @@ export type AssistantState =
   | 'THINKING'
   | 'SPEAKING'
   | 'ACTION'
-  | 'ERROR';
+  | 'ERROR'
+  | 'DISSOLVING';
 
 export type VisualState = {
   eyeColor: string;
