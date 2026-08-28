@@ -1,0 +1,21 @@
+{
+  "expo": {
+    "name": "CR3@TIX-JARVIS",
+    "slug": "cr3atix-jarvis",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "platforms": ["android", "web"],
+    "android": {
+      "package": "com.cr3atix.jarvis",
+      "permissions": ["RECORD_AUDIO", "VIBRATE"]
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single"
+    },
+    "experiments": {
+      "baseUrl": "/assistant-jarvis"
+    }
+  }
+}
