@@ -89,9 +89,9 @@ export function JarvisCore({ state }: Props) {
           <View style={styles.circuitLineA} />
           <View style={styles.circuitLineB} />
           <View style={styles.chestCore} />
-          <Animated.View style={[styles.heartGlow, { backgroundColor: heartColor, opacity: pulseOpacity, transform: [{ scale: pulseScale }] }]}>
-            <View style={styles.heartTopLeft} />
-            <View style={styles.heartTopRight} />
+          <Animated.View style={[styles.heartGlow, { backgroundColor: heartColor, opacity: pulseOpacity, transform: [{ scale: pulseScale }, { rotate: '-45deg' }] }]}>
+            <Animated.View style={[styles.heartTopLeft, { backgroundColor: heartColor }]} />
+            <Animated.View style={[styles.heartTopRight, { backgroundColor: heartColor }]} />
           </Animated.View>
         </View>
 
@@ -126,9 +126,9 @@ const styles = StyleSheet.create({
   chestCore: { position: 'absolute', left: 94, top: 31, width: 54, height: 80, borderWidth: 1, borderColor: '#0C6880', borderRadius: 22, opacity: 0.55 },
   circuitLineA: { position: 'absolute', left: 20, top: 47, width: 72, height: 1, backgroundColor: '#167D95', transform: [{ rotate: '-12deg' }], opacity: 0.7 },
   circuitLineB: { position: 'absolute', right: 18, top: 48, width: 76, height: 1, backgroundColor: '#167D95', transform: [{ rotate: '13deg' }], opacity: 0.7 },
-  heartGlow: { position: 'absolute', right: 63, top: 61, width: 31, height: 31, transform: [{ rotate: '-45deg' }], borderRadius: 5, shadowColor: '#FF8A00', shadowOpacity: 1, shadowRadius: 15 },
-  heartTopLeft: { position: 'absolute', left: 0, top: -10, width: 31, height: 31, borderRadius: 16, backgroundColor: 'inherit' as never },
-  heartTopRight: { position: 'absolute', right: -10, top: 0, width: 31, height: 31, borderRadius: 16, backgroundColor: 'inherit' as never },
+  heartGlow: { position: 'absolute', right: 63, top: 61, width: 31, height: 31, borderRadius: 5, shadowColor: '#FF8A00', shadowOpacity: 1, shadowRadius: 15 },
+  heartTopLeft: { position: 'absolute', left: 0, top: -10, width: 31, height: 31, borderRadius: 16 },
+  heartTopRight: { position: 'absolute', right: -10, top: 0, width: 31, height: 31, borderRadius: 16 },
   energyBase: { marginTop: 10, width: 166, height: 9, borderRadius: 20, backgroundColor: '#16C5E7', opacity: 0.18, transform: [{ scaleX: 1.15 }] },
   stateLabel: { marginTop: 19, color: '#82EEFF', fontSize: 13, letterSpacing: 3.2, fontWeight: '800' },
   stateHint: { marginTop: 6, color: '#356F7A', fontSize: 9, letterSpacing: 2, fontWeight: '700' },
