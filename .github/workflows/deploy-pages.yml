@@ -35,6 +35,10 @@ jobs:
       - name: Export Expo web app
         run: npm run export:web
 
+      - name: Write update metadata
+        run: |
+          printf '{"build":"%s","publishedAt":"%s"}\n' "$GITHUB_SHA" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > dist/version.json
+
       - name: Disable Jekyll
         run: touch dist/.nojekyll
 
